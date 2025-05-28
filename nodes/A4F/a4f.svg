@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>A4F Icon</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#6563FF" x="0" y="0" width="32" height="32" rx="3"></rect>
+        <path d="M7.5,24 L11.5,8 L14.5,8 L18.5,24 L15.5,24 L14.5,20 L11.5,20 L10.5,24 L7.5,24 Z M12,17 L14,17 L13,12 L12,17 Z" fill="#FFFFFF" fill-rule="nonzero"></path>
+        <path d="M20,24 L20,8 L23,8 L23,21 L27,21 L27,24 L20,24 Z" fill="#FFFFFF" fill-rule="nonzero"></path>
+        <path d="M6,28 L26,28 L26,25 L6,25 L6,28 Z" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+</svg> 
