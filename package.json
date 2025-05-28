@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-a4f",
+  "name": "@mailcomorg/n8n-nodes-a4f",
   "version": "0.1.0",
   "description": "n8n node to interact with the A4F AI API",
   "keywords": [
@@ -63,5 +63,8 @@
   "peerDependencies": {
     "n8n-core": "*",
     "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 } 
