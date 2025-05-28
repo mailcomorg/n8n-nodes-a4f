@@ -1,11 +1,11 @@
-import type {
+import {
 	IExecuteFunctions,
-	IDataObject,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	NodeOperationError,
+	NodeConnectionType,
 } from 'n8n-workflow';
-import { NodeConnectionType } from 'n8n-workflow';
 
 export class A4F implements INodeType {
 	description: INodeTypeDescription = {
@@ -15,7 +15,7 @@ export class A4F implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
-		description: 'Interact with A4F AI API',
+		description: 'Use the A4F API',
 		defaults: {
 			name: 'A4F',
 		},
@@ -48,17 +48,29 @@ export class A4F implements INodeType {
 				name: 'model',
 				type: 'string',
 				default: 'provider-1/chatgpt-4o-latest',
-				description: 'The model to use for completion (e.g., provider-1/chatgpt-4o-latest, anthropic/claude-3-opus)',
+				description: 'The model to use for chat completion',
 				required: true,
+				displayOptions: {
+					show: {
+						operation: ['chatCompletion'],
+					},
+				},
 			},
 			{
 				displayName: 'Messages',
 				name: 'messages',
+				placeholder: 'Add Message',
 				type: 'fixedCollection',
 				typeOptions: {
 					multipleValues: true,
+					sortable: true,
 				},
 				default: {},
+				displayOptions: {
+					show: {
+						operation: ['chatCompletion'],
+					},
+				},
 				options: [
 					{
 						name: 'messagesUi',
@@ -83,53 +95,67 @@ export class A4F implements INodeType {
 									},
 								],
 								default: 'user',
+								description: 'The role of the message',
 							},
 							{
 								displayName: 'Content',
 								name: 'content',
 								type: 'string',
 								default: '',
+								description: 'The content of the message',
 							},
 						],
 					},
 				],
-				description: 'The messages to send to the API',
 			},
 			{
-				displayName: 'Additional Fields',
+				displayName: 'Options',
 				name: 'additionalFields',
 				type: 'collection',
-				placeholder: 'Add Field',
+				placeholder: 'Add Option',
 				default: {},
+				displayOptions: {
+					show: {
+						operation: ['chatCompletion'],
+					},
+				},
 				options: [
 					{
 						displayName: 'Temperature',
 						name: 'temperature',
 						type: 'number',
+						default: 0.7,
+						description:
+							'Controls randomness: Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive.',
 						typeOptions: {
 							minValue: 0,
 							maxValue: 2,
+							numberPrecision: 1,
 						},
-						default: 0.7,
-						description: 'Sampling temperature between 0 and 2',
 					},
 					{
 						displayName: 'Max Tokens',
 						name: 'max_tokens',
 						type: 'number',
 						default: 1024,
-						description: 'Maximum number of tokens to generate',
+						description:
+							'The maximum number of tokens to generate in the chat completion',
+						typeOptions: {
+							minValue: 1,
+						},
 					},
 					{
 						displayName: 'Top P',
 						name: 'top_p',
 						type: 'number',
+						default: 1,
+						description:
+							'Controls diversity via nucleus sampling: 0.5 means half of all likelihood-weighted options are considered',
 						typeOptions: {
 							minValue: 0,
 							maxValue: 1,
+							numberPrecision: 1,
 						},
-						default: 0.9,
-						description: 'Nucleus sampling parameter',
 					},
 				],
 			},
@@ -146,19 +172,46 @@ export class A4F implements INodeType {
 
 				if (operation === 'chatCompletion') {
 					const model = this.getNodeParameter('model', i) as string;
-					const messagesUi = this.getNodeParameter('messages.messagesUi', i, []) as IDataObject[];
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const messagesUi = this.getNodeParameter('messages.messagesUi', i, []) as Array<{
+						role: string;
+						content: string;
+					}>;
+					const additionalFields = this.getNodeParameter('additionalFields', i, {}) as {
+						temperature?: number;
+						max_tokens?: number;
+						top_p?: number;
+					};
 
-					const messages = messagesUi.map((messageData) => ({
-						role: messageData.role as string,
-						content: messageData.content as string,
+					const messages = messagesUi.map((messageUi) => ({
+						role: messageUi.role,
+						content: messageUi.content,
 					}));
 
-					const body: IDataObject = {
+					const body: {
+						model: string;
+						messages: Array<{
+							role: string;
+							content: string;
+						}>;
+						temperature?: number;
+						max_tokens?: number;
+						top_p?: number;
+					} = {
 						model,
 						messages,
-						...additionalFields,
 					};
+
+					if (additionalFields.temperature !== undefined) {
+						body.temperature = additionalFields.temperature;
+					}
+
+					if (additionalFields.max_tokens !== undefined) {
+						body.max_tokens = additionalFields.max_tokens;
+					}
+
+					if (additionalFields.top_p !== undefined) {
+						body.top_p = additionalFields.top_p;
+					}
 
 					const response = await this.helpers.requestWithAuthentication.call(this, 'a4fApi', {
 						method: 'POST',
@@ -180,7 +233,7 @@ export class A4F implements INodeType {
 					});
 					continue;
 				}
-				throw error;
+				throw new NodeOperationError(this.getNode(), error);
 			}
 		}
 

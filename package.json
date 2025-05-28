@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-a4f-hosein",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n node to interact with the A4F AI API",
   "keywords": [
     "n8n-community-node-package",
