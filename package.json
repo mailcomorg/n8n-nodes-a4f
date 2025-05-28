@@ -9,14 +9,14 @@
     "llm"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/yourusername/n8n-nodes-a4f#readme",
+  "homepage": "https://github.com/mailcomorg/n8n-nodes-a4f#readme",
   "author": {
     "name": "hosein ebrahimzadeh ",
     "email": "hoseinezci@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/n8n-nodes-a4f.git"
+    "url": "https://github.com/mailcomorg/n8n-nodes-a4f.git"
   },
   "engines": {
     "node": ">=18.10",
